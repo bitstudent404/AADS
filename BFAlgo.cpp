@@ -1,66 +1,109 @@
 
 #include <iostream>
+#include <ctime>
 using namespace std;
 
-int main() {
+int main()
+{
     int V, E;
-        cout << "Enter vertices and edges: ";
-            cin >> V >> E;
+    cout << "Enter vertices and edges: ";
+    cin >> V >> E;
 
-                int u[100], v[100], w[100];
-                    int dist[100];
+    int u[100], v[100], w[100];
+    int dist[100];
 
-                        cout << "Enter edges (source destination weight):\n";
-                            for (int i = 0; i < E; i++) {
-                                    cin >> u[i] >> v[i] >> w[i];
-                                        }
+    cout << "Enter edges (source destination weight):\n";
 
-                                            int source;
-                                                cout << "Enter source vertex: ";
-                                                    cin >> source;
+    for (int i = 0; i < E; i++)
+    {
+        cin >> u[i] >> v[i] >> w[i];
+    }
 
-                                                        // Initialize distances
-                                                            for (int i = 0; i < V; i++) {
-                                                                    dist[i] = 99999;
-                                                                        }
+    int source;
+    cout << "Enter source vertex: ";
+    cin >> source;
 
-                                                                            dist[source] = 0;
+    // Initialize distances
+    for (int i = 0; i < V; i++)
+    {
+        dist[i] = 99999;
+    }
 
-                                                                                // Relax edges V-1 times
-                                                                                    for (int i = 1; i < V; i++) {
-                                                                                            for (int j = 0; j < E; j++) {
-                                                                                                        if (dist[u[j]] != 99999 &&
-                                                                                                                        dist[u[j]] + w[j] < dist[v[j]]) {
+    dist[source] = 0;
 
-                                                                                                                                        dist[v[j]] = dist[u[j]] + w[j];
-                                                                                                                                                    }
-                                                                                                                                                            }
-                                                                                                                                                                }
+    int relaxations = 0;
+    int passes = 0;
 
-                                                                                                                                                                    // Check negative weight cycle
-                                                                                                                                                                        for (int j = 0; j < E; j++) {
-                                                                                                                                                                                if (dist[u[j]] != 99999 &&
-                                                                                                                                                                                            dist[u[j]] + w[j] < dist[v[j]]) {
+    clock_t start = clock();
 
-                                                                                                                                                                                                        cout << "Negative weight cycle detected!";
-                                                                                                                                                                                                                    return 0;
-                                                                                                                                                                                                                            }
-                                                                                                                                                                                                                                }
+    // Bellman-Ford: Relax edges V-1 times
+    for (int i = 1; i < V; i++)
+    {
+        passes++;
+        int updated = 0;
 
-                                                                                                                                                                                                                                    // Print shortest distances
-                                                                                                                                                                                                                                        cout << "\nShortest distances:\n";
+        for (int j = 0; j < E; j++)
+        {
+            relaxations++;
 
-                                                                                                                                                                                                                                            for (int i = 0; i < V; i++) {
-                                                                                                                                                                                                                                                    cout << source << " to " << i << " = ";
+            if (dist[u[j]] != 99999 &&
+                dist[u[j]] + w[j] < dist[v[j]])
+            {
+                dist[v[j]] = dist[u[j]] + w[j];
+                updated = 1;
+            }
+        }
 
-                                                                                                                                                                                                                                                            if (dist[i] == 99999)
-                                                                                                                                                                                                                                                                        cout << "Unreachable";
-                                                                                                                                                                                                                                                                                else
-                                                                                                                                                                                                                                                                                            cout << dist[i];
+        // Stop early if no distance changes
+        if (updated == 0)
+            break;
+    }
 
-                                                                                                                                                                                                                                                                                                    cout << endl;
-                                                                                                                                                                                                                                                                                                        }
+    // Check negative weight cycle
+    int negativeCycle = 0;
 
-                                                                                                                                                                                                                                                                                                            return 0;
-                                                                                                                                                                                                                                                                                                            }
-                                                                                                                                                                                                                                                                                                            
+    for (int j = 0; j < E; j++)
+    {
+        if (dist[u[j]] != 99999 &&
+            dist[u[j]] + w[j] < dist[v[j]])
+        {
+            negativeCycle = 1;
+            break;
+        }
+    }
+
+    clock_t end = clock();
+
+    double timeTaken =
+        double(end - start) / CLOCKS_PER_SEC;
+
+    if (negativeCycle)
+    {
+        cout << "\nNegative weight cycle detected!\n";
+    }
+    else
+    {
+        cout << "\nShortest distances:\n";
+
+        for (int i = 0; i < V; i++)
+        {
+            cout << source << " to " << i << " = ";
+
+            if (dist[i] == 99999)
+                cout << "Unreachable";
+            else
+                cout << dist[i];
+
+            cout << endl;
+        }
+    }
+
+    cout << "\n--- Performance Analysis ---\n";
+    cout << "Number of passes: " << passes << endl;
+    cout << "Edge relaxation checks: " << relaxations << endl;
+    cout << "Execution time: " << timeTaken
+         << " seconds\n";
+
+
+    return 0;
+}
